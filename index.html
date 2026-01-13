@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>瀚森帮你找到 VibeCoding 方向</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        /* 开屏动画 */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0f;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+        
+        .splash-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .splash-logo {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #00d4ff, #7b2fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+        
+        .splash-text {
+            color: #666;
+            font-size: 14px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        .splash-dots {
+            display: flex;
+            gap: 8px;
+            margin-top: 30px;
+        }
+        
+        .splash-dots span {
+            width: 8px;
+            height: 8px;
+            background: #00d4ff;
+            border-radius: 50%;
+            animation: bounce 1.4s ease-in-out infinite;
+        }
+        
+        .splash-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .splash-dots span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        /* 页面通用 */
+        .page { display: none; animation: fadeIn 0.4s ease; }
+        .page.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 欢迎页 */
+        .welcome-page { text-align: center; padding-top: 60px; }
+        
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #00d4ff20, #7b2fff20);
+            border: 1px solid #00d4ff40;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            font-size: 36px;
+        }
+        
+        .welcome-title {
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+        
+        .welcome-title span {
+            background: linear-gradient(135deg, #00d4ff, #7b2fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .welcome-desc {
+            color: #888;
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 40px;
+        }
+        
+        /* 表单样式 */
+        .page-header { margin-bottom: 24px; }
+        .page-step { color: #00d4ff; font-size: 12px; margin-bottom: 8px; }
+        .page-title { font-size: 20px; font-weight: bold; line-height: 1.4; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; color: #888; font-size: 13px; margin-bottom: 10px; }
+        
+        .form-select, .form-input, .form-textarea {
+            width: 100%;
+            padding: 14px 16px;
+            background: #15151f;
+            border: 1px solid #2a2a3a;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        .form-select:focus, .form-input:focus, .form-textarea:focus {
+            border-color: #00d4ff;
+        }
+        
+        .form-select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: none;
+            font-family: inherit;
+            line-height: 1.6;
+        }
+        
+        .form-hint {
+            color: #666;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        
+        /* 进度条 */
+        .progress-bar {
+            height: 4px;
+            background: #2a2a3a;
+            border-radius: 2px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #7b2fff);
+            border-radius: 2px;
+            transition: width 0.4s ease;
+        }
+        
+        /* 选项样式 */
+        .options { display: flex; flex-direction: column; gap: 10px; }
+        
+        .option {
+            padding: 16px 18px;
+            background: #15151f;
+            border: 1px solid #2a2a3a;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .option:hover {
+            border-color: #00d4ff50;
+            background: #1a1a25;
+        }
+        
+        .option.selected {
+            border-color: #00d4ff;
+            background: linear-gradient(135deg, #00d4ff10, #7b2fff10);
+        }
+        
+        .option.unsure {
+            border-style: dashed;
+            color: #888;
+        }
+        
+        .option.unsure.selected {
+            border-color: #7b2fff;
+            color: #fff;
+        }
+        
+        /* 多选样式 */
+        .options.multi .option.selected {
+            border-color: #00d4ff;
+            background: linear-gradient(135deg, #00d4ff10, #7b2fff10);
+        }
+        
+        .options.multi .option.selected::before {
+            content: '✓ ';
+            color: #00d4ff;
+        }
+        
+        .other-input-wrap {
+            margin-top: 12px;
+        }
+        
+        .other-input-wrap .form-textarea {
+            min-height: 80px;
+        }
+        
+        /* 按钮 */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 24px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #7b2fff);
+            color: #fff;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #2a2a3a;
+            color: #888;
+            margin-top: 12px;
+        }
+        
+        /* 分析中页面 */
+        .analyzing-page { padding-top: 80px; text-align: center; }
+        
+        .analyzing-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            position: relative;
+        }
+        
+        .analyzing-circle {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid transparent;
+            border-top-color: #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .analyzing-circle:nth-child(2) {
+            width: 80%; height: 80%; top: 10%; left: 10%;
+            border-top-color: #7b2fff;
+            animation-duration: 1.5s;
+            animation-direction: reverse;
+        }
+        
+        .analyzing-circle:nth-child(3) {
+            width: 60%; height: 60%; top: 20%; left: 20%;
+            border-top-color: #00d4ff;
+            animation-duration: 2s;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .analyzing-text {
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 12px;
+        }
+        
+        .analyzing-text span { color: #00d4ff; }
+        
+        .analyzing-sub {
+            font-size: 13px;
+            color: #555;
+        }
+        
+        /* 结果页 */
+        .result-page { padding-top: 20px; padding-bottom: 40px; }
+        
+        .result-header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: linear-gradient(135deg, #00d4ff10, #7b2fff10);
+            border-radius: 16px;
+            border: 1px solid #00d4ff30;
+        }
+        
+        .result-header h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .result-header p {
+            color: #888;
+            font-size: 14px;
+        }
+        
+        .result-content {
+            background: #15151f;
+            border: 1px solid #2a2a3a;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .result-section {
+            margin-bottom: 20px;
+        }
+        
+        .result-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .result-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .result-section-content {
+            font-size: 14px;
+            color: #ccc;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+        
+        .result-project {
+            background: #0a0a0f;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .result-project:last-child {
+            margin-bottom: 0;
+        }
+        
+        .result-project-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .result-project-desc {
+            font-size: 13px;
+            color: #999;
+            line-height: 1.7;
+        }
+        
+        /* CTA 区域 */
+        .cta-section {
+            text-align: center;
+            padding: 24px 20px;
+            background: linear-gradient(135deg, #15151f, #1a1a25);
+            border-radius: 16px;
+            border: 1px solid #2a2a3a;
+        }
+        
+        .cta-title {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        
+        .cta-desc {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .cta-qrcode {
+            width: 150px;
+            height: 150px;
+            background: #fff;
+            border-radius: 12px;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-size: 11px;
+        }
+        
+        .cta-hint {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* 迷茫型结果 */
+        .confused-result {
+            text-align: center;
+            padding: 30px 20px;
+        }
+        
+        .confused-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .confused-title {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        
+        .confused-desc {
+            font-size: 14px;
+            color: #888;
+            line-height: 1.8;
+            margin-bottom: 24px;
+        }
+        
+        /* 错误提示 */
+        .error-toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff4757;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .error-toast.show {
+            opacity: 1;
+        }
+</style>
+</head>
+<body>
+    <!-- 开屏动画 -->
+    <div class="splash-screen" id="splash">
+        <div class="splash-logo">Hi，我是瀚森</div>
+        <div class="splash-text">让我来帮你找到方向...</div>
+        <div class="splash-dots"><span></span><span></span><span></span></div>
+    </div>
+    
+    <!-- 错误提示 -->
+    <div class="error-toast" id="errorToast"></div>
+
+    <div class="container">
+        <!-- 欢迎页 -->
+        <div class="page welcome-page active" id="page-welcome">
+            <div class="welcome-icon" style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; padding: 0; border: 2px solid #00d4ff40;">
+                <img src="瀚森照片.jpg" alt="瀚森" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <h1 class="welcome-title">我是瀚森<br><span>帮你找到 VibeCoding 方向</span></h1>
+            <p class="welcome-desc">
+                回答几个简单问题<br>
+                我来帮你分析最适合你的创造方向<br>
+                找到属于你的第一个作品
+            </p>
+            <button class="btn btn-primary" onclick="startQuiz()">开始聊聊</button>
+        </div>
+
+        <!-- 基础信息页 -->
+        <div class="page" id="page-info">
+            <div class="progress-bar"><div class="progress-fill" style="width: 10%"></div></div>
+            <div class="page-header">
+                <div class="page-step">STEP 1/9</div>
+                <h2 class="page-title">先让我认识一下你</h2>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">你的年龄段</label>
+                <select class="form-select" id="age">
+                    <option value="">请选择</option>
+                    <option value="18-22岁（学生/刚毕业）">18-22 岁（学生/刚毕业）</option>
+                    <option value="23-28岁">23-28 岁</option>
+                    <option value="29-35岁">29-35 岁</option>
+                    <option value="36-45岁">36-45 岁</option>
+                    <option value="46-55岁">46-55 岁</option>
+                    <option value="55岁以上">55 岁以上</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">你所在的行业</label>
+                <select class="form-select" id="industry">
+                    <option value="">请选择</option>
+                    <option value="互联网/科技">互联网/科技</option>
+                    <option value="教育培训">教育培训</option>
+                    <option value="金融/保险">金融/保险</option>
+                    <option value="医疗健康">医疗健康</option>
+                    <option value="电商/零售">电商/零售</option>
+                    <option value="自媒体/内容">自媒体/内容</option>
+                    <option value="制造业">制造业</option>
+                    <option value="房产/建筑">房产/建筑</option>
+                    <option value="学生">学生</option>
+                    <option value="自由职业">自由职业</option>
+                    <option value="其他行业">其他行业</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">你的 MBTI（选填）</label>
+                <select class="form-select" id="mbti">
+                    <option value="">不知道 / 跳过</option>
+                    <option value="INTJ">INTJ 建筑师</option>
+                    <option value="INTP">INTP 逻辑学家</option>
+                    <option value="ENTJ">ENTJ 指挥官</option>
+                    <option value="ENTP">ENTP 辩论家</option>
+                    <option value="INFJ">INFJ 提倡者</option>
+                    <option value="INFP">INFP 调停者</option>
+                    <option value="ENFJ">ENFJ 主人公</option>
+                    <option value="ENFP">ENFP 竞选者</option>
+                    <option value="ISTJ">ISTJ 物流师</option>
+                    <option value="ISFJ">ISFJ 守卫者</option>
+                    <option value="ESTJ">ESTJ 总经理</option>
+                    <option value="ESFJ">ESFJ 执政官</option>
+                    <option value="ISTP">ISTP 鉴赏家</option>
+                    <option value="ISFP">ISFP 探险家</option>
+                    <option value="ESTP">ESTP 企业家</option>
+                    <option value="ESFP">ESFP 表演者</option>
+                </select>
+            </div>
+            
+            <button class="btn btn-primary" id="btn-info" onclick="submitInfo()" disabled>继续</button>
+        </div>
+
+        <!-- 问题1：心流时刻 -->
+        <div class="page" id="page-q1">
+            <div class="progress-bar"><div class="progress-fill" style="width: 20%"></div></div>
+            <div class="page-header">
+                <div class="page-step">问题 1/6</div>
+                <h2 class="page-title">做什么事情的时候，你会完全忘记时间？</h2>
+            </div>
+            <div class="options" data-question="q1">
+                <div class="option" data-value="整理收纳、分类归档、把事情安排得井井有条">整理收纳、分类归档、把事情安排得井井有条</div>
+                <div class="option" data-value="写东西、发内容、表达自己的想法">写东西、发内容、表达自己的想法</div>
+                <div class="option" data-value="研究某个领域、深挖细节、越挖越有意思">研究某个领域、深挖细节、越挖越有意思</div>
+                <div class="option" data-value="教别人、解答问题、帮人出主意">教别人、解答问题、帮人出主意</div>
+                <div class="option" data-value="练习某项技能（乐器/运动/画画/手工）">练习某项技能（乐器/运动/画画/手工）</div>
+                <div class="option unsure" data-value="不确定，好像没有特别沉浸的事">🤔 不确定，好像没有特别沉浸的事</div>
+            </div>
+        </div>
+
+        <!-- 问题2：社交价值 -->
+        <div class="page" id="page-q2">
+            <div class="progress-bar"><div class="progress-fill" style="width: 30%"></div></div>
+            <div class="page-header">
+                <div class="page-step">问题 2/6</div>
+                <h2 class="page-title">朋友们最常因为什么事来找你？</h2>
+            </div>
+            <div class="options" data-question="q2">
+                <div class="option" data-value="推荐好东西、帮忙挑选、种草">推荐好东西、帮忙挑选、种草</div>
+                <div class="option" data-value="某个专业领域的问题（健康/法律/理财/育儿等）">某个专业领域的问题（健康/法律/理财/育儿等）</div>
+                <div class="option" data-value="职业规划、工作建议、人生方向">职业规划、工作建议、人生方向</div>
+                <div class="option" data-value="情绪支持、倾听烦恼、陪聊">情绪支持、倾听烦恼、陪聊</div>
+                <div class="option" data-value="技术问题、效率方法、工具推荐">技术问题、效率方法、工具推荐</div>
+                <div class="option unsure" data-value="不确定，好像没什么人特别找我">🤔 不确定，好像没什么人特别找我</div>
+            </div>
+        </div>
+
+        <!-- 问题3：知识储备 -->
+        <div class="page" id="page-q3">
+            <div class="progress-bar"><div class="progress-fill" style="width: 40%"></div></div>
+            <div class="page-header">
+                <div class="page-step">问题 3/6</div>
+                <h2 class="page-title">如果有人愿意付费听你聊一小时，你会聊什么？</h2>
+            </div>
+            <div class="options" data-question="q3">
+                <div class="option" data-value="我的本职工作经验和行业洞察">我的本职工作经验和行业洞察</div>
+                <div class="option" data-value="我的兴趣爱好（摄影/健身/读书/游戏/音乐等）">我的兴趣爱好（摄影/健身/读书/游戏/音乐等）</div>
+                <div class="option" data-value="我踩过的坑、省钱省时间的方法">我踩过的坑、省钱省时间的方法</div>
+                <div class="option" data-value="育儿/养生/理财/情感等生活经验">育儿/养生/理财/情感等生活经验</div>
+                <div class="option unsure" data-value="不确定，我也不知道能聊什么">🤔 不确定，我也不知道能聊什么</div>
+            </div>
+        </div>
+
+        <!-- 问题4：痛点需求 -->
+        <div class="page" id="page-q4">
+            <div class="progress-bar"><div class="progress-fill" style="width: 50%"></div></div>
+            <div class="page-header">
+                <div class="page-step">问题 4/6</div>
+                <h2 class="page-title">你现在最想有个工具帮你自动搞定什么？</h2>
+            </div>
+            <div class="options" data-question="q4">
+                <div class="option" data-value="记账、理财、管理收支">记账、理财、管理收支</div>
+                <div class="option" data-value="整理资料、管理文件、搭建知识库">整理资料、管理文件、搭建知识库</div>
+                <div class="option" data-value="跟进客户、维护关系、管理私域">跟进客户、维护关系、管理私域</div>
+                <div class="option" data-value="学习某项技能、保持练习、追踪进度">学习某项技能、保持练习、追踪进度</div>
+                <div class="option" data-value="写内容、做图、发社交媒体">写内容、做图、发社交媒体</div>
+                <div class="option unsure" data-value="不确定，好像都想要又都不迫切">🤔 不确定，好像都想要又都不迫切</div>
+            </div>
+        </div>
+
+        <!-- 问题5：产品偏好 -->
+        <div class="page" id="page-q5">
+            <div class="progress-bar"><div class="progress-fill" style="width: 60%"></div></div>
+            <div class="page-header">
+                <div class="page-step">问题 5/6</div>
+                <h2 class="page-title">你更想做什么类型的产品？</h2>
+            </div>
+            <div class="options" data-question="q5">
+                <div class="option" data-value="解决自己问题的效率工具">解决自己问题的效率工具（先服务自己）</div>
+                <div class="option" data-value="帮助特定人群的垂直产品">帮助特定人群的垂直产品（服务他人）</div>
+                <div class="option" data-value="辅助内容创作的IP工具">辅助内容创作的 IP 工具（打造影响力）</div>
+                <div class="option" data-value="可以直接卖钱的商业产品">可以直接卖钱的商业产品（快速变现）</div>
+                <div class="option unsure" data-value="不确定，不知道哪个适合我">🤔 不确定，不知道哪个适合我</div>
+            </div>
+        </div>
+
+        <!-- 问题6：学习动机 -->
+        <div class="page" id="page-q6">
+            <div class="progress-bar"><div class="progress-fill" style="width: 70%"></div></div>
+            <div class="page-header">
+                <div class="page-step">问题 6/6</div>
+                <h2 class="page-title">你为什么想学 VibeCoding？</h2>
+            </div>
+            <div class="options" data-question="q6">
+                <div class="option" data-value="想开启副业，多一份收入">想开启副业，多一份收入</div>
+                <div class="option" data-value="想提升工作效率，减少重复劳动">想提升工作效率，减少重复劳动</div>
+                <div class="option" data-value="想转型/创业，掌握新技能">想转型/创业，掌握新技能</div>
+                <div class="option" data-value="单纯好奇，想看看AI能做什么">单纯好奇，想看看 AI 能做什么</div>
+                <div class="option" data-value="焦虑被AI取代，想主动学习">焦虑被 AI 取代，想主动学习</div>
+                <div class="option unsure" data-value="不确定，就是想试试">🤔 不确定，就是想试试</div>
+            </div>
+        </div>
+
+        <!-- 多选题1：技能爱好 -->
+        <div class="page" id="page-s1">
+            <div class="progress-bar"><div class="progress-fill" style="width: 80%"></div></div>
+            <div class="page-header">
+                <div class="page-step">深入了解 1/2</div>
+                <h2 class="page-title">你有什么特别的技能或爱好？（可多选）</h2>
+            </div>
+            <div class="options multi" data-question="skills">
+                <div class="option" data-value="会乐器（吉他/钢琴/尤克里里等）">🎸 会乐器（吉他/钢琴/尤克里里等）</div>
+                <div class="option" data-value="健身/运动/瑜伽">💪 健身/运动/瑜伽</div>
+                <div class="option" data-value="摄影/剪辑/设计">📷 摄影/剪辑/设计</div>
+                <div class="option" data-value="写作/读书/做笔记">✍️ 写作/读书/做笔记</div>
+                <div class="option" data-value="做饭/烘焙/美食">🍳 做饭/烘焙/美食</div>
+                <div class="option" data-value="带娃/育儿经验丰富">👶 带娃/育儿经验丰富</div>
+                <div class="option" data-value="理财/投资/记账">💰 理财/投资/记账</div>
+                <div class="option" data-value="销售/谈判/沟通能力强">🤝 销售/谈判/沟通能力强</div>
+                <div class="option" data-value="PPT/Excel/办公软件很熟">📊 PPT/Excel/办公软件很熟</div>
+                <div class="option" data-value="懂点编程/技术">💻 懂点编程/技术</div>
+                <div class="option other-option" data-value="other">✏️ 其他（点击输入）</div>
+            </div>
+            <div class="other-input-wrap" id="skills-other-wrap" style="display: none;">
+                <textarea class="form-textarea" id="skills-other" placeholder="写写你的特别技能或爱好..."></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="submitSkills()">继续</button>
+            <button class="btn btn-secondary" onclick="skipSkills()">没什么特别的，跳过</button>
+        </div>
+
+        <!-- 多选题2：工作痛点 -->
+        <div class="page" id="page-s2">
+            <div class="progress-bar"><div class="progress-fill" style="width: 90%"></div></div>
+            <div class="page-header">
+                <div class="page-step">深入了解 2/2</div>
+                <h2 class="page-title">你工作/生活中最烦的重复性事情？（可多选）</h2>
+            </div>
+            <div class="options multi" data-question="painpoints">
+                <div class="option" data-value="写周报/日报/汇报材料">📝 写周报/日报/汇报材料</div>
+                <div class="option" data-value="回复消息/跟进客户">💬 回复消息/跟进客户</div>
+                <div class="option" data-value="整理文件/找资料">📁 整理文件/找资料</div>
+                <div class="option" data-value="做表格/处理数据">📊 做表格/处理数据</div>
+                <div class="option" data-value="写文案/做图/发内容">✍️ 写文案/做图/发内容</div>
+                <div class="option" data-value="记账/对账/报销">💳 记账/对账/报销</div>
+                <div class="option" data-value="带新人/反复回答同样问题">👥 带新人/反复回答同样问题</div>
+                <div class="option" data-value="安排日程/协调会议">📅 安排日程/协调会议</div>
+                <div class="option" data-value="学习新东西但总是坚持不下来">📚 学习新东西但总是坚持不下来</div>
+                <div class="option other-option" data-value="other">✏️ 其他（点击输入）</div>
+            </div>
+            <div class="other-input-wrap" id="painpoints-other-wrap" style="display: none;">
+                <textarea class="form-textarea" id="painpoints-other" placeholder="写写你最烦的重复性事情..."></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="submitPainpoints()">让瀚森帮我分析</button>
+            <button class="btn btn-secondary" onclick="skipPainpoints()">没什么特别烦的，跳过</button>
+        </div>
+
+        <!-- 分析中页面 -->
+        <div class="page analyzing-page" id="page-analyzing">
+            <div class="analyzing-icon">
+                <div class="analyzing-circle"></div>
+                <div class="analyzing-circle"></div>
+                <div class="analyzing-circle"></div>
+            </div>
+            <p class="analyzing-text">瀚森正在看你的回答...</p>
+            <p class="analyzing-sub">结合你的情况，给你一些建议</p>
+        </div>
+
+        <!-- 结果页面 -->
+        <div class="page result-page" id="page-result">
+            <div class="result-header">
+                <h2>🎯 瀚森给你的建议</h2>
+                <p>根据你的回答，我觉得这些方向适合你</p>
+            </div>
+            
+            <div id="result-content"></div>
+            
+            <div class="cta-section">
+                <h3 class="cta-title">想在 2 天内做出来？</h3>
+                <p class="cta-desc">扫码咨询「零基础 VibeCoding 实战私房课」<br>1 月 31 日-2 月 1 日 · 杭州</p>
+                <div class="cta-qrcode">
+                    <img src="郭瀚森微信二维码.jpg" alt="扫码添加瀚森微信" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">
+                </div>
+                <p class="cta-hint">瀚森 1v1 帮你明确方向</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 用户数据
+        const userData = {
+            age: '', industry: '', mbti: '',
+            q1: '', q2: '', q3: '', q4: '', q5: '', q6: '',
+            skills: '', painpoints: ''
+        };
+        
+        let unsureCount = 0; // 记录选了多少个「不确定」
+
+        // 页面切换
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        // 显示错误
+        function showError(msg) {
+            const toast = document.getElementById('errorToast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // 开始测试
+        function startQuiz() {
+            showPage('page-info');
+        }
+
+        // 验证基础信息
+        function validateInfo() {
+            const age = document.getElementById('age').value;
+            const industry = document.getElementById('industry').value;
+            // mbti 是选填，不参与验证
+            document.getElementById('btn-info').disabled = !(age && industry);
+        }
+
+        // 提交基础信息
+        function submitInfo() {
+            userData.age = document.getElementById('age').value;
+            userData.industry = document.getElementById('industry').value;
+            userData.mbti = document.getElementById('mbti').value || '未填写';
+            showPage('page-q1');
+        }
+
+        // 主观题提交
+        function submitSubjective1() {
+            userData.skills = document.getElementById('skills').value;
+            showPage('page-s2');
+        }
+        
+        function skipSubjective1() {
+            userData.skills = '未填写';
+            showPage('page-s2');
+        }
+        
+        function submitSubjective2() {
+            userData.painpoints = document.getElementById('painpoints').value;
+            startAnalysis();
+        }
+        
+        function skipSubjective2() {
+            userData.painpoints = '未填写';
+            startAnalysis();
+        }
+
+        // 多选题数据
+        const multiSelectData = {
+            skills: [],
+            painpoints: []
+        };
+
+        // 技能多选提交
+        function submitSkills() {
+            const selected = multiSelectData.skills;
+            const otherText = document.getElementById('skills-other').value.trim();
+            
+            if (selected.includes('other') && otherText) {
+                // 把 other 替换成实际输入的内容
+                const idx = selected.indexOf('other');
+                selected[idx] = otherText;
+            } else if (selected.includes('other')) {
+                // 选了其他但没写，移除
+                const idx = selected.indexOf('other');
+                selected.splice(idx, 1);
+            }
+            
+            userData.skills = selected.length > 0 ? selected.join('、') : '未填写';
+            showPage('page-s2');
+        }
+        
+        function skipSkills() {
+            userData.skills = '未填写';
+            showPage('page-s2');
+        }
+
+        // 痛点多选提交
+        function submitPainpoints() {
+            const selected = multiSelectData.painpoints;
+            const otherText = document.getElementById('painpoints-other').value.trim();
+            
+            if (selected.includes('other') && otherText) {
+                const idx = selected.indexOf('other');
+                selected[idx] = otherText;
+            } else if (selected.includes('other')) {
+                const idx = selected.indexOf('other');
+                selected.splice(idx, 1);
+            }
+            
+            userData.painpoints = selected.length > 0 ? selected.join('、') : '未填写';
+            startAnalysis();
+        }
+        
+        function skipPainpoints() {
+            userData.painpoints = '未填写';
+            startAnalysis();
+        }
+
+        // 开始 AI 分析
+        async function startAnalysis() {
+            showPage('page-analyzing');
+            
+            // 先发送数据到飞书
+            sendToFeishu();
+            
+            // 构建 prompt
+            const prompt = buildPrompt();
+            
+            try {
+                const result = await callDifyAPI(prompt);
+                renderResult(result);
+                showPage('page-result');
+            } catch (error) {
+                console.error('API Error:', error);
+                // 如果 API 失败，使用本地逻辑
+                const fallbackResult = generateFallbackResult();
+                renderResult(fallbackResult);
+                showPage('page-result');
+            }
+        }
+
+        // 发送数据到飞书
+        async function sendToFeishu() {
+            const webhook = 'https://open.feishu.cn/open-apis/bot/v2/hook/34ca70c4-60d8-46ba-a755-6b55d5448c93';
+            
+            const content = `📋 新用户完成测评
+
+👤 基础信息
+• 年龄：${userData.age}
+• 行业：${userData.industry}
+• MBTI：${userData.mbti}
+
+📝 问答记录
+1. 心流时刻：${userData.q1}
+2. 朋友找我：${userData.q2}
+3. 付费聊啥：${userData.q3}
+4. 想自动化：${userData.q4}
+5. 产品偏好：${userData.q5}
+6. 学习动机：${userData.q6}
+
+🎯 深入了解
+• 技能爱好：${userData.skills}
+• 工作痛点：${userData.painpoints}
+
+⏰ 提交时间：${new Date().toLocaleString('zh-CN')}`;
+
+            try {
+                await fetch(webhook, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        msg_type: 'text',
+                        content: { text: content }
+                    })
+                });
+            } catch (e) {
+                console.error('飞书发送失败:', e);
+            }
+        }
+
+        // 构建 prompt
+        function buildPrompt() {
+            const isConfused = unsureCount >= 3;
+            
+            return `你是瀚森，一个 VibeCoding（用 AI 辅助编程）课程的老师。你要用第一人称「我」来给用户分析，语气要像朋友聊天一样亲切自然。
+
+用户信息：
+- 年龄：${userData.age}
+- 行业：${userData.industry}
+- MBTI：${userData.mbti}
+
+用户回答：
+1. 做什么事会忘记时间：${userData.q1}
+2. 朋友常找他做什么：${userData.q2}
+3. 愿意付费聊什么：${userData.q3}
+4. 最想自动化什么：${userData.q4}
+5. 想做什么类型产品：${userData.q5}
+6. 学习动机：${userData.q6}
+
+主观回答：
+- 特别的技能/爱好：${userData.skills}
+- 工作中最烦的重复性事情：${userData.painpoints}
+
+用户选择了 ${unsureCount} 个「不确定」选项。
+
+${isConfused ? `
+这位用户目前还比较迷茫，不太清楚自己想要什么。请用瀚森的口吻：
+1. 先肯定他愿意探索的态度（比如「没关系，很多人一开始都不确定」）
+2. 根据他填写的有限信息，给出 1 个可能的方向（不要太具体）
+3. 强调「我建议你来线下课，咱们当面聊聊，我帮你找到最适合你的方向」
+4. 语气要温暖、像朋友一样
+` : `
+请用瀚森的口吻，给出分析：
+1. 对用户的印象（2-3句话，用「你」来称呼对方，比如「看了你的回答，我觉得你是个...」）
+2. 推荐 2 个最适合他的项目方向，每个方向包括：
+   - 项目名称（要具体，比如「吉他练习助手」）
+   - 为什么我觉得适合你（用「你」称呼，结合他的回答）
+   - 这个东西能做什么（3-4 个核心功能）
+   - 能不能赚钱（怎么赚，大概多少）
+3. 给一句鼓励的话，让他期待来上课
+`}
+
+请用 JSON 格式返回，结构如下：
+{
+  "isConfused": ${isConfused},
+  "summary": "瀚森对用户的印象/开场白",
+  "projects": [
+    {
+      "name": "项目名称",
+      "icon": "一个 emoji",
+      "reason": "为什么适合你",
+      "features": "能做什么",
+      "money": "变现潜力"
+    }
+  ],
+  "encouragement": "鼓励的话",
+  "needChat": ${isConfused}
+}`;
+        }
+
+        // 调用 Dify API
+        async function callDifyAPI(prompt) {
+            const response = await fetch('https://api.dify.ai/v1/chat-messages', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer app-6vKkVJJw89LvwjWGuKTktPQD',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    inputs: {},
+                    query: prompt,
+                    response_mode: 'blocking',
+                    user: 'quiz-user-' + Date.now()
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('API request failed');
+            }
+            
+            const data = await response.json();
+            const answer = data.answer;
+            
+            // 尝试解析 JSON
+            try {
+                // 提取 JSON 部分
+                const jsonMatch = answer.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    return JSON.parse(jsonMatch[0]);
+                }
+            } catch (e) {
+                console.error('JSON parse error:', e);
+            }
+            
+            // 如果解析失败，返回原始文本
+            return { rawText: answer };
+        }
+
+        // 本地降级结果
+        function generateFallbackResult() {
+            const isConfused = unsureCount >= 3;
+            
+            if (isConfused) {
+                return {
+                    isConfused: true,
+                    summary: '没关系，很多人一开始都不确定自己能做什么，这很正常。我看了你的回答，虽然你还在探索阶段，但愿意迈出这一步就已经很棒了。',
+                    projects: [
+                        {
+                            name: '先从解决自己的小问题开始',
+                            icon: '🌱',
+                            reason: '不需要一开始就想清楚做什么大产品',
+                            features: '先学会用工具解决日常小问题，灵感自然会来',
+                            money: '技能本身就是最大的回报'
+                        }
+                    ],
+                    encouragement: '我建议你来线下课，咱们当面聊聊，我帮你找到最适合你的方向。',
+                    needChat: true
+                };
+            }
+            
+            // 根据回答生成简单推荐
+            const projects = [];
+            
+            if (userData.q1.includes('整理') || userData.q4.includes('整理')) {
+                projects.push({
+                    name: '文档整理助手',
+                    icon: '📁',
+                    reason: '你喜欢整理归档，把事情安排得井井有条，这个方向特别适合你',
+                    features: '智能分类、自动标签、全文搜索、知识图谱',
+                    money: '一次性付费 99 元，或订阅制 9.9/月'
+                });
+            }
+            
+            if (userData.q1.includes('技能') || userData.q4.includes('学习')) {
+                projects.push({
+                    name: '技能练习助手',
+                    icon: '🎸',
+                    reason: '你享受练习的过程，可以把这个体验做成产品，帮助和你一样的人',
+                    features: '每日计划、进度追踪、瓶颈诊断、成就系统',
+                    money: '月订阅 19.9 元，垂直用户付费意愿强'
+                });
+            }
+            
+            if (userData.q4.includes('记账')) {
+                projects.push({
+                    name: '智能记账 APP',
+                    icon: '💰',
+                    reason: '你自己就有记账的需求，先解决自己的问题，再帮助别人',
+                    features: '自动分类、收支报告、预算提醒、理财建议',
+                    money: '月订阅 19.9 元，1000 用户 = 2 万/月'
+                });
+            }
+            
+            if (projects.length < 2) {
+                projects.push({
+                    name: '内容创作工具',
+                    icon: '✍️',
+                    reason: '不管你做什么，内容能力都很重要，这个工具能帮你提升 10 倍效率',
+                    features: '标题生成、文案改写、热点追踪、数据分析',
+                    money: '月订阅 29.9 元，自媒体人刚需'
+                });
+            }
+            
+            return {
+                isConfused: false,
+                summary: `看了你的回答，我觉得你是个有想法的人。${userData.age} 在 ${userData.industry} 工作，想通过学习新技能来提升自己，这个方向是对的。${userData.mbti !== '未填写' ? '而且你是 ' + userData.mbti + '，' : ''}`,
+                projects: projects.slice(0, 2),
+                encouragement: '来线下课，两天时间我带你把这些想法变成现实！',
+                needChat: false
+            };
+        }
+
+        // 渲染结果
+        function renderResult(result) {
+            const container = document.getElementById('result-content');
+            
+            // 如果是原始文本（API 返回非 JSON）
+            if (result.rawText) {
+                container.innerHTML = `
+                    <div class="result-content">
+                        <div class="result-section">
+                            <div class="result-section-title">� 瀚森说</div>
+                            <div class="result-section-content">${result.rawText}</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 迷茫型用户
+            if (result.isConfused || result.needChat) {
+                container.innerHTML = `
+                    <div class="result-content">
+                        <div class="confused-result">
+                            <div class="confused-icon">🤝</div>
+                            <h3 class="confused-title">我懂你的感觉</h3>
+                            <p class="confused-desc">${result.summary}</p>
+                        </div>
+                        
+                        ${result.projects ? result.projects.map(p => `
+                            <div class="result-project">
+                                <div class="result-project-title">${p.icon} ${p.name}</div>
+                                <div class="result-project-desc">${p.reason}<br>${p.features}</div>
+                            </div>
+                        `).join('') : ''}
+                        
+                        <div class="result-section" style="margin-top: 20px; text-align: center;">
+                            <p style="color: #00d4ff; font-size: 15px; line-height: 1.8;">
+                                ${result.encouragement || '来线下课，咱们当面聊聊，我帮你找到方向。'}
+                            </p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 正常结果
+            container.innerHTML = `
+                <div class="result-content">
+                    <div class="result-section">
+                        <div class="result-section-title">� 瀚森说</div>
+                        <div class="result-section-content">${result.summary}</div>
+                    </div>
+                </div>
+                
+                <div class="result-content">
+                    <div class="result-section">
+                        <div class="result-section-title">🎯 我建议你试试这两个方向</div>
+                    </div>
+                    ${result.projects.map((p, i) => `
+                        <div class="result-project">
+                            <div class="result-project-title">${p.icon} ${p.name}</div>
+                            <div class="result-project-desc">
+                                <strong>为什么适合你：</strong>${p.reason}<br><br>
+                                <strong>能做什么：</strong>${p.features}<br><br>
+                                <strong>💰 能赚钱吗：</strong>${p.money}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="result-content" style="text-align: center; padding: 24px;">
+                    <p style="color: #00d4ff; font-size: 15px; line-height: 1.8;">
+                        ✨ ${result.encouragement}
+                    </p>
+                </div>
+            `;
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 开屏动画
+            setTimeout(() => {
+                document.getElementById('splash').classList.add('hidden');
+            }, 2000);
+            
+            // 基础信息验证
+            ['age', 'industry'].forEach(id => {
+                document.getElementById(id).addEventListener('input', validateInfo);
+                document.getElementById(id).addEventListener('change', validateInfo);
+            });
+            
+            // 选项点击
+            document.querySelectorAll('.options').forEach(optionsContainer => {
+                const question = optionsContainer.dataset.question;
+                const isMulti = optionsContainer.classList.contains('multi');
+                
+                optionsContainer.querySelectorAll('.option').forEach(option => {
+                    option.addEventListener('click', function() {
+                        const value = this.dataset.value;
+                        
+                        if (isMulti) {
+                            // 多选逻辑
+                            this.classList.toggle('selected');
+                            
+                            if (this.classList.contains('selected')) {
+                                multiSelectData[question].push(value);
+                            } else {
+                                const idx = multiSelectData[question].indexOf(value);
+                                if (idx > -1) multiSelectData[question].splice(idx, 1);
+                            }
+                            
+                            // 如果点击的是「其他」，显示/隐藏输入框
+                            if (this.classList.contains('other-option')) {
+                                const wrap = document.getElementById(question + '-other-wrap');
+                                wrap.style.display = this.classList.contains('selected') ? 'block' : 'none';
+                                if (this.classList.contains('selected')) {
+                                    document.getElementById(question + '-other').focus();
+                                }
+                            }
+                        } else {
+                            // 单选逻辑
+                            optionsContainer.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+                            this.classList.add('selected');
+                            
+                            userData[question] = value;
+                            
+                            if (this.classList.contains('unsure')) {
+                                unsureCount++;
+                            }
+                            
+                            // 延迟跳转
+                            setTimeout(() => {
+                                const qNum = parseInt(question.replace('q', ''));
+                                if (qNum < 6) {
+                                    showPage('page-q' + (qNum + 1));
+                                } else {
+                                    showPage('page-s1');
+                                }
+                            }, 300);
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
