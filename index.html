@@ -714,7 +714,7 @@
             <div class="other-input-wrap" id="skills-other-wrap" style="display: none;">
                 <textarea class="form-textarea" id="skills-other" placeholder="写写你的特别技能或爱好..."></textarea>
             </div>
-            <button class="btn btn-primary" onclick="submitSkills()">继续</button>
+            <button class="btn btn-primary" id="btn-skills" onclick="submitSkills()" disabled>继续</button>
             <button class="btn btn-secondary" onclick="skipSkills()">没什么特别的，跳过</button>
         </div>
 
@@ -740,7 +740,7 @@
             <div class="other-input-wrap" id="painpoints-other-wrap" style="display: none;">
                 <textarea class="form-textarea" id="painpoints-other" placeholder="写写你最烦的重复性事情..."></textarea>
             </div>
-            <button class="btn btn-primary" onclick="submitPainpoints()">让瀚森帮我分析</button>
+            <button class="btn btn-primary" id="btn-painpoints" onclick="submitPainpoints()" disabled>让瀚森帮我分析</button>
             <button class="btn btn-secondary" onclick="skipPainpoints()">没什么特别烦的，跳过</button>
         </div>
 
@@ -1240,6 +1240,10 @@ ${isConfused ? `
                                     document.getElementById(question + '-other').focus();
                                 }
                             }
+                            
+                            // 更新按钮状态
+                            const btnId = question === 'skills' ? 'btn-skills' : 'btn-painpoints';
+                            document.getElementById(btnId).disabled = multiSelectData[question].length === 0;
                         } else {
                             // 单选逻辑
                             optionsContainer.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
