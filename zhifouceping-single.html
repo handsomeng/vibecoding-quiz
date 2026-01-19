@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>知否·情感侧写</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React & ReactDOM CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- Babel Standalone for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: serif;
+    }
+    .writing-vertical-rl {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+    }
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fade-in-up {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fade-in 0.8s ease-out forwards;
+    }
+    .animate-fade-in-up {
+      animation: fade-in-up 0.8s ease-out forwards;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Lucide Icon Components
+    const Leaf = ({ className }) => <i data-lucide="leaf" className={className}></i>;
+    const Wind = ({ className }) => <i data-lucide="wind" className={className}></i>;
+    const Cloud = ({ className }) => <i data-lucide="cloud" className={className}></i>;
+    const Scroll = ({ className }) => <i data-lucide="scroll" className={className}></i>;
+    const RefreshCcw = ({ className }) => <i data-lucide="refresh-ccw" className={className}></i>;
+    const ChevronRight = ({ className }) => <i data-lucide="chevron-right" className={className}></i>;
+
+    // Initialize Lucide icons after render
+    const useLucide = () => {
+      useEffect(() => {
+        if (window.lucide) {
+          lucide.createIcons();
+        }
+      });
+    };
+
+    // --- Data & Content ---
+    const QUESTIONS = [
+      {
+        id: 1,
+        question: "深宅大院，风波暗涌。若有人在你背后设局陷害，但尚未造成实质伤害，你会如何应对？",
+        options: [
+          { text: "隐忍不发，暗中收集证据，待其露出马脚一击必杀。", type: "Minglan" },
+          { text: "直接打上门去，闹得人尽皆知，让对方不敢再犯。", type: "GuTingye" },
+          { text: "顾及颜面，私下找中间人调停，希望能化干戈为玉帛。", type: "QiHeng" },
+          { text: "不论真假，先在长辈面前哭诉委屈，占据道德高地。", type: "Molan" }
+        ]
+      },
+      {
+        id: 2,
+        question: "面对这一生的伴侣，你最看重的是什么？",
+        options: [
+          { text: "志同道合，能懂我的言外之意，灵魂共鸣。", type: "QiHeng" },
+          { text: "哪怕与全世界为敌，也能护我周全的绝对偏爱。", type: "GuTingye" },
+          { text: "能看透我的伪装，让我不仅是某人的妻子/丈夫，更是我自己。", type: "Minglan" },
+          { text: "门第显赫，能助我跨越阶层，从此高人一等。", type: "Molan" }
+        ]
+      },
+      {
+        id: 3,
+        question: "若你正如日中天，却突然遭逢家中巨变，落魄潦倒，你会？",
+        options: [
+          { text: "既来之则安之，守好剩下的一亩三分地，过好自己的日子。", type: "Minglan" },
+          { text: "我不认命！哪怕落草为寇也要杀出一条血路，重回巅峰。", type: "GuTingye" },
+          { text: "心灰意冷，感叹世事无常，从此寄情山水或诗书。", type: "QiHeng" },
+          { text: "利用一切现有资源，哪怕依附他人也要维持体面。", type: "Molan" }
+        ]
+      },
+      {
+        id: 4,
+        question: "挚友为了利益背叛了你，多年后他落难来求你，你如何抉择？",
+        options: [
+          { text: "该帮则帮，但也仅仅是帮这一次，从此恩断义绝。", type: "Minglan" },
+          { text: "看心情，若他真诚悔过便拉一把，若只是做戏便轰出去。", type: "GuTingye" },
+          { text: "念及旧情，无法硬下心肠，尽力相助。", type: "QiHeng" },
+          { text: "落井下石，这种人留着也是祸害，不如趁机踩死。", type: "Molan" }
+        ]
+      },
+      {
+        id: 5,
+        question: "在这漫长的一生中，你认为「幸福」的定义是？",
+        options: [
+          { text: "平平淡淡，手里有钱，身边有人，无灾无难。", type: "Minglan" },
+          { text: "快意恩仇，想爱就爱，想恨就恨，活得痛快。", type: "GuTingye" },
+          { text: "得不到的才是最好的，心中永远有一轮白月光。", type: "QiHeng" },
+          { text: "站在高处，受万人敬仰，掌握自己的命运。", type: "Molan" }
+        ]
+      }
+    ];
+
+    const RESULTS = {
+      Minglan: {
+        name: "盛明兰",
+        title: "通透玲珑·大智若愚",
+        poem: "依稀还是，旧时如意。",
+        desc: "你在情感中极度清醒。你并非没有激情，而是懂得在现实的泥沼中保护自己。你的爱是细水长流的经营，是看透生活真相后依然热爱生活的勇气。你最需要的是一个能让你卸下防备、安心做自己的人。",
+        color: "text-emerald-800",
+        bgColor: "bg-emerald-50",
+        borderColor: "border-emerald-200"
+      },
+      GuTingye: {
+        name: "顾廷烨",
+        title: "桀骜赤诚·护短情深",
+        poem: "纵马长歌，不知归路。",
+        desc: "你的情感热烈而直接。虽然外表可能显得漫不经心甚至有些叛逆，但内心深处极度渴望归属感。一旦认定一个人，你会倾尽所有去守护。你讨厌虚伪的客套，渴望的是一份能够并肩作战、生死相依的深刻羁绊。",
+        color: "text-red-900",
+        bgColor: "bg-red-50",
+        borderColor: "border-red-200"
+      },
+      QiHeng: {
+        name: "齐衡",
+        title: "温润如玉·情深缘浅",
+        poem: "金风玉露，相逢恨晚。",
+        desc: "你是一个理想主义者，拥有纯粹而美好的情感世界。你温柔体贴，总是为他人着想，但也容易因为顾虑太多而错失良机。你的爱是洁白无瑕的，但在充满烟火气和算计的现实中，往往需要多一点打破常规的勇气。",
+        color: "text-blue-800",
+        bgColor: "bg-blue-50",
+        borderColor: "border-blue-200"
+      },
+      Molan: {
+        name: "盛墨兰",
+        title: "机关算尽·虽败犹荣",
+        poem: "云鬓斜簪，独上高楼。",
+        desc: "你在情感中拥有极强的目标感和胜负欲。你认为幸福是靠自己争取（甚至抢夺）来的，不相信天上掉馅饼。这种务实和野心让你在逆境中生存能力极强，但也容易让你在精明算计中迷失了爱的初衷。试着偶尔糊涂一次。",
+        color: "text-purple-900",
+        bgColor: "bg-purple-50",
+        borderColor: "border-purple-200"
+      }
+    };
+
+    // --- Components ---
+    const LoadingScreen = ({ onFinish }) => {
+      useLucide();
+      
+      useEffect(() => {
+        const timer = setTimeout(onFinish, 2000);
+        return () => clearTimeout(timer);
+      }, [onFinish]);
+
+      return (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#fcf9f2] text-[#3e3c3d]">
+          <div className="relative animate-pulse">
+            <Leaf className="w-16 h-16 text-emerald-700 opacity-80" />
+          </div>
+          <div className="mt-6 font-serif text-xl tracking-[0.3em] text-stone-600 animate-fade-in-up">
+            正在研墨...
+          </div>
+        </div>
+      );
+    };
+
+    function App() {
+      useLucide();
+      
+      const [view, setView] = useState('welcome');
+      const [loading, setLoading] = useState(true);
+      const [currentQuestion, setCurrentQuestion] = useState(0);
+      const [scores, setScores] = useState({ Minglan: 0, GuTingye: 0, QiHeng: 0, Molan: 0 });
+      const [finalResult, setFinalResult] = useState(null);
+
+      const handleStart = () => {
+        setView('quiz');
+      };
+
+      const handleAnswer = (type) => {
+        const newScores = { ...scores, [type]: scores[type] + 1 };
+        setScores(newScores);
+
+        if (currentQuestion < QUESTIONS.length - 1) {
+          setTimeout(() => {
+            setCurrentQuestion(curr => curr + 1);
+          }, 300);
+        } else {
+          calculateResult(newScores);
+        }
+      };
+
+      const calculateResult = (finalScores) => {
+        let winner = Object.keys(finalScores).reduce((a, b) => finalScores[a] > finalScores[b] ? a : b);
+        setFinalResult(winner);
+        setView('result');
+      };
+
+      const restart = () => {
+        setScores({ Minglan: 0, GuTingye: 0, QiHeng: 0, Molan: 0 });
+        setCurrentQuestion(0);
+        setFinalResult(null);
+        setView('welcome');
+      };
+
+      if (loading) {
+        return <LoadingScreen onFinish={() => setLoading(false)} />;
+      }
+
+      return (
+        <div 
+          className="min-h-screen w-full font-serif text-[#3e3c3d] relative overflow-hidden select-none"
+          style={{ 
+            backgroundColor: '#fcf9f2', 
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d6cfc2' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` 
+          }}
+        >
+          {/* Decorative Elements */}
+          <div className="fixed top-0 left-0 w-32 h-32 opacity-10 pointer-events-none transform -rotate-12">
+            <Leaf className="w-full h-full text-emerald-800" />
+          </div>
+          <div className="fixed bottom-0 right-0 w-48 h-48 opacity-5 pointer-events-none">
+            <Cloud className="w-full h-full text-stone-800" />
+          </div>
+
+          <div className="max-w-md mx-auto min-h-screen flex flex-col relative z-10">
+            
+            {/* === WELCOME SCREEN === */}
+            {view === 'welcome' && (
+              <div className="flex-1 flex flex-col items-center justify-center p-8 animate-fade-in">
+                <div className="w-px h-16 bg-stone-300 mb-6"></div>
+                
+                <h1 className="text-4xl md:text-5xl font-bold tracking-widest text-center writing-vertical-rl text-emerald-900 mb-8 border-l-2 border-emerald-900/20 pl-4 py-2">
+                  知否<br/><span className="text-2xl mt-4 text-stone-600 font-normal">情感侧写</span>
+                </h1>
+                
+                <p className="text-center text-stone-600 mb-12 italic leading-relaxed text-sm opacity-80">
+                  试问卷帘人，<br/>却道海棠依旧。<br/>知否，知否？<br/>应是绿肥红瘦。
+                </p>
+
+                <button 
+                  onClick={handleStart}
+                  className="group relative px-8 py-3 bg-emerald-800 text-[#fcf9f2] rounded-sm hover:bg-emerald-900 transition-all duration-500 shadow-md flex items-center gap-2 overflow-hidden"
+                >
+                  <span className="relative z-10 tracking-[0.2em] font-bold">入画测试</span>
+                  <ChevronRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
+                  <div className="absolute inset-0 bg-stone-800 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500 opacity-20"></div>
+                </button>
+                
+                <div className="w-px h-16 bg-stone-300 mt-12"></div>
+                <p className="text-xs text-stone-400 mt-4 tracking-widest">Hanson 专属版</p>
+              </div>
+            )}
+
+            {/* === QUIZ SCREEN === */}
+            {view === 'quiz' && (
+              <div className="flex-1 flex flex-col p-6 animate-fade-in">
+                {/* Progress Bar */}
+                <div className="w-full h-1 bg-stone-200 mb-8 mt-4 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-emerald-800 transition-all duration-700 ease-out"
+                    style={{ width: `${((currentQuestion + 1) / QUESTIONS.length) * 100}%` }}
+                  ></div>
+                </div>
+
+                <div className="flex-1 flex flex-col justify-center">
+                  <div className="mb-2 text-emerald-800 font-bold text-sm tracking-widest opacity-60">
+                    第 {['一', '二', '三', '四', '五'][currentQuestion]} 问
+                  </div>
+                  
+                  <h2 className="text-xl md:text-2xl font-medium leading-relaxed text-stone-800 mb-10 text-justify">
+                    {QUESTIONS[currentQuestion].question}
+                  </h2>
+
+                  <div className="space-y-4">
+                    {QUESTIONS[currentQuestion].options.map((option, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleAnswer(option.type)}
+                        className="w-full text-left p-5 border border-stone-300 bg-white/50 backdrop-blur-sm hover:bg-stone-50 hover:border-emerald-700 hover:shadow-md transition-all duration-300 rounded-sm group relative overflow-hidden active:scale-[0.98]"
+                      >
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-800 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></div>
+                        <span className="text-stone-700 group-hover:text-stone-900 font-medium leading-relaxed">
+                          {option.text}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* === RESULT SCREEN === */}
+            {view === 'result' && finalResult && (
+              <div className="flex-1 flex flex-col items-center p-8 animate-fade-in bg-white/30 backdrop-blur-sm min-h-screen">
+                <div className="w-full flex justify-between items-center mb-8 opacity-50">
+                  <Cloud className="w-6 h-6" />
+                  <Wind className="w-6 h-6" />
+                </div>
+
+                <div className="flex-1 flex flex-col items-center justify-center w-full">
+                  <div className={`p-1 mb-6 border-2 rounded-full ${RESULTS[finalResult].borderColor}`}>
+                    <div className={`w-24 h-24 rounded-full ${RESULTS[finalResult].bgColor} flex items-center justify-center`}>
+                      <span className={`text-4xl font-bold ${RESULTS[finalResult].color}`}>
+                        {RESULTS[finalResult].name.charAt(1)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <h2 className={`text-3xl font-bold mb-2 ${RESULTS[finalResult].color}`}>
+                    {RESULTS[finalResult].name}
+                  </h2>
+                  
+                  <div className="h-px w-12 bg-current opacity-30 my-4"></div>
+
+                  <h3 className="text-lg font-medium text-stone-600 mb-6 tracking-widest">
+                    {RESULTS[finalResult].title}
+                  </h3>
+
+                  <div className="relative p-6 bg-[#fcf9f2] shadow-lg border border-stone-200 max-w-sm rounded-sm mb-10">
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#fcf9f2] px-3 text-emerald-800">
+                      <Scroll className="w-5 h-5" />
+                    </div>
+                    <p className="text-center text-stone-500 text-sm mb-4 font-bold opacity-80 font-serif">
+                      " {RESULTS[finalResult].poem} "
+                    </p>
+                    <p className="text-justify text-stone-700 leading-relaxed text-sm">
+                      {RESULTS[finalResult].desc}
+                    </p>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={restart}
+                  className="mb-8 flex items-center gap-2 text-stone-500 hover:text-emerald-800 transition-colors px-6 py-2 border border-transparent hover:border-stone-300 rounded-full"
+                >
+                  <RefreshCcw className="w-4 h-4" />
+                  <span className="text-sm tracking-widest">再测一次</span>
+                </button>
+              </div>
+            )}
+
+          </div>
+        </div>
+      );
+    }
+
+    // Render the app
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
